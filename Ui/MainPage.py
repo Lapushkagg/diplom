@@ -1,18 +1,22 @@
 import allure
+import time
 import configparser
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 class MainPage:
-    def __init__(self, config_file="test_config.ini") -> None:
+    def __init__(self, config_file="test_config.ini", driver_path="path/to/chromedriver.exe") -> None:
         config = configparser.ConfigParser()
         config.read(config_file)
         self.base_url = config["ui"]["base_url"]
-        self.__driver = webdriver.Chrome(self.base_url)
+        self.__driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        self.__driver.maximize_window()
 
     def go(self):
         self.__driver.get(self.base_url)
@@ -57,13 +61,14 @@ class MainPage:
             "//div[@class='styles_sidebarContainer__dxNPY']"
             "//a[text()='Фильмы']"
         ).click()
-        WebDriverWait(self.__driver, 10).until(
-            EC.element_to_be_clickable(
-                (By.XPATH, "/html/body/div[1]/div[1]/div[2]"
-                 "/div[4]/div[2]/div/a[9]"))
-        ).click()
-
-        element = self.__driver.find_element(By.CSS_SELECTOR, "main h1").text
+        self.__driver.execute_script("window.scrollBy(0, 1000);")
+        link = WebDriverWait(self.__driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//a[.//span[text()='Фильмы про вампиров']]"))
+        )
+        link.click()
+        element = WebDriverWait(self.__driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "main h1"))
+        ).text
         return element
 
     @allure.step("Сделать фильтрацию фильмов по стране Австралия")
@@ -80,3 +85,7 @@ class MainPage:
         ).click()
         element = self.__driver.find_element(By.CSS_SELECTOR, "h1 span").text
         return element
+    
+    def close(self):
+        self.__driver.quit()
+

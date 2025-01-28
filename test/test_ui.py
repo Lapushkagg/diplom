@@ -1,5 +1,6 @@
 import allure
 import time
+import pytest
 from Ui.MainPage import MainPage
 from testdata.DataProvider import DataProvider
 
@@ -12,7 +13,6 @@ serial_name = data_provider.get("serial")
 collection_name = data_provider.get("collection")
 country_name = data_provider.get("country")
 
-
 @allure.feature('Поиск фильмов')
 @allure.story('Поиск фильма по имени')
 @allure.severity(allure.severity_level.NORMAL)
@@ -21,20 +21,20 @@ def test_find_film():
     kinopoisk.go()
     time.sleep(15)
     result = kinopoisk.find_in(film_name)
+    kinopoisk.close()
     assert result == film_name
-
 
 @allure.feature('Актеры')
 @allure.story('Открытие страницы с наградами актера')
-@allure.severity(allure.severity_level.HIGH)
+@allure.severity(allure.severity_level.NORMAL)
 def test_open_awards():
     kinopoisk = MainPage()
     kinopoisk.go()
     time.sleep(15)
     kinopoisk.find_in(actor_name)
     result = kinopoisk.open_awards()
+    kinopoisk.close()
     assert result == f'{actor_name} — награды и кинопремии — Кинопоиск'
-
 
 @allure.feature('Коллекции')
 @allure.story('Открытие коллекции фильмов')
@@ -44,8 +44,8 @@ def test_open_collection():
     kinopoisk.go()
     time.sleep(15)
     result = kinopoisk.go_to_collection()
+    kinopoisk.close()
     assert result == collection_name
-
 
 @allure.feature('Поиск сериалов')
 @allure.story('Поиск сериалов по имени')
@@ -55,8 +55,8 @@ def test_find_serial():
     kinopoisk.go()
     time.sleep(15)
     result = kinopoisk.find_in(serial_name)
+    kinopoisk.close()
     assert result == serial_name
-
 
 @allure.feature('Поиск по странам')
 @allure.story('Поиск фильмов по Австралии')
@@ -66,4 +66,5 @@ def test_find_by_Australia():
     kinopoisk.go()
     time.sleep(15)
     result = kinopoisk.find_by_Australia()
+    kinopoisk.close()
     assert result == country_name
